@@ -1,0 +1,6 @@
+[submodule "hl2ss"]
+	path = hl2ss
+	url = https://github.com/jdibenes/hl2ss
+[submodule "offline_scripts/hl2ss_yz"]
+	path = offline_scripts/hl2ss_yz
+	url = git@github.com:yzhao520/hl2ss_yz.git
