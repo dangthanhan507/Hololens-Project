@@ -2,7 +2,7 @@ import cv2
 import os
 
 if __name__ == '__main__':
-    PATH = '/home/andang/workspace/Computational_Vision/HL2/Hololens-Project/datasets/an_place/raw-04-12-08-33/depth_ahat/'
+    PATH = '/home/andang/workspace/Computational_Vision/HL2/Hololens-Project/datasets/an_place/raw-04-13-13-55/depth_ahat/'
     im_paths = sorted(os.listdir(PATH))
     print(len(im_paths))
 
