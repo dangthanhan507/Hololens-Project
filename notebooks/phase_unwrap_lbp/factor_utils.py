@@ -551,6 +551,63 @@ def run_loopy_bp_parallel(G, max_iters, conv_tol):
     return nodeMargs
 
 
+def run_loopy_bp_parallel2(G, max_iters, conv_tol):
+    """
+    RUN_LOOPY_BP - Runs Loopy Belief Propagation (Sum-Product) on a factor
+    Graph given by 'G'.This implements a "parallel" updating scheme in
+    which all factor-to-variable messages are updated in a single clock
+    cycle, and then all variable-to-factor messages are updated.
+
+    Parameters
+    ----------
+    G : Factor Graph
+    max_iters : max iterations
+    conv_tol : convergence tolerance
+
+    Returns
+    -------
+    nodeMargs : list keeping track of node marginals at each iteration.
+                NodeMargs[i] is a dictionary containing beliefs for each node 
+                with the same format as nodeMarg = marg_brute_force(G)
+    """
+
+    variable_nodes = G.get_variable_nodes()
+
+    M = init_message(G)
+    sched = generate_schedule(G)
+    num_msgs = len(sched)
+
+    nodeMarg = None
+    for iters in range(max_iters):
+        M_old = {var: fac.copy() for var, fac in M.items()}
+        # M_old = deepcopy(M)
+
+        for I in range(num_msgs):
+            fac_i = sched[I][0]
+            var_j = sched[I][1]
+
+            # get incoming messages
+            nbrs_var = list(G.neighbors(fac_i))
+            nbrs_var.remove(var_j)
+            preM = get_msg_var2fac(G, nbrs_var, fac_i, M_old)
+            msg = update_fac2var_msg(G, fac_i, var_j, preM)
+            M[var_j][fac_i] = msg
+
+        # keep track of node marginals at each iteration    
+        del nodeMarg
+        nodeMarg = get_beliefs(G, M, variable_nodes)
+
+        # check message convergence
+        if iters > 0 and check_converged(M, M_old, conv_tol):
+            print('Parallel LBP converged in', iters, 'iterations.')
+            break
+    else:
+        print('Parallel LBP did not converge. Terminated at', max_iters, 'iterations')
+
+    return nodeMarg
+
+
+
 def belief_diff(b1, b2):
     """
     BELIEF_DIFF - Computes the symmetric L1 distance between belief's 'b1'
